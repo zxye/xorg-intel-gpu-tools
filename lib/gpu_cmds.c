@@ -68,14 +68,15 @@ uint32_t
 gen11_fill_curbe_buffer_data(struct intel_batchbuffer *batch,
 			    uint8_t color)
 {
-	uint8_t *curbe_buffer;
+	uint32_t *curbe_buffer;
 	uint32_t offset;
 
 	curbe_buffer = intel_batchbuffer_subdata_alloc(batch,
 						       sizeof(uint32_t) * 8,
 						       64);
 	offset = intel_batchbuffer_subdata_offset(batch, curbe_buffer);
-	*curbe_buffer = color;
+	*curbe_buffer++ = 0;
+	*curbe_buffer = 1;
 
 	return offset;
 }
@@ -431,7 +432,6 @@ gen8_fill_surface_state(struct intel_batchbuffer *batch,
 
 	return offset;
 }
-
 uint32_t
 gen11_fill_surface_state(struct intel_batchbuffer *batch,
 			const struct igt_buf *buf,
@@ -494,6 +494,50 @@ gen11_fill_surface_state(struct intel_batchbuffer *batch,
 		ss->ss5.mip_count = 2;
 	}
 
+/*	if (is_dst) {
+    ss->ss0.cube_pos_z = 0,
+    ss->ss0.cube_neg_z = 0,
+    ss->ss0.cube_pos_y = 0,
+    ss->ss0.cube_neg_y = 0,
+    ss->ss0.cube_pos_x = 0,
+    ss->ss0.cube_neg_x = 0,
+    ss->ss0.media_boundary_pixel_mode = 0,
+    ss->ss0.render_cache_read_write = 0, 
+    ss->ss0.sampler_l2_bypass_disable = 0,
+    ss->ss0.vert_line_stride_ofs = 0,
+    ss->ss0.vert_line_stride = 0,
+    ss->ss0.tiled_mode = 0,
+    ss->ss0.horizontal_alignment = 1,
+    ss->ss0.vertical_alignment = 1,
+    ss->ss0.surface_format = 511,
+    ss->ss0.pad0 = 0, 
+    ss->ss0.is_array = 0,
+    ss->ss0.surface_type = 4;
+ 
+    ss->ss1.qpitch = 0, ss->ss1.pad1 = 0, ss->ss1.base_mip_level = 0, ss->ss1.memory_object_control = 2, ss->ss1.pad0 = 1;
+    ss->ss2.width = 95, ss->ss2.pad1 = 0, ss->ss2.height = 1, ss->ss2.pad0 = 0;
+    }
+    else{
+    ss->ss0.cube_pos_z = 0, ss->ss0.cube_neg_z = 0, ss->ss0.cube_pos_y = 0, ss->ss0.cube_neg_y = 0, ss->ss0.cube_pos_x = 0, ss->ss0.cube_neg_x = 0, ss->ss0.media_boundary_pixel_mode = 0, ss->ss0.render_cache_read_write = 0, 
+            ss->ss0.sampler_l2_bypass_disable = 0, ss->ss0.vert_line_stride_ofs = 0, ss->ss0.vert_line_stride = 0, ss->ss0.tiled_mode = 0, ss->ss0.horizontal_alignment = 0, ss->ss0.vertical_alignment = 0, ss->ss0.surface_format = 0, ss->ss0.pad0 = 0, 
+            ss->ss0.is_array = 0, ss->ss0.surface_type = 0;
+    ss->ss1.qpitch = 1010,
+    ss->ss1.pad1 = 8,
+    ss->ss1.base_mip_level = 31,
+    ss->ss1.memory_object_control = 0,
+    ss->ss1.pad0 = 0;
+ 
+    ss->ss2.width = 1019,
+    ss->ss2.pad1 = 0,
+    ss->ss2.height = 9216,
+    ss->ss2.pad0 = 0;
+ 
+    ss->ss3.pitch = 64, ss->ss3.pad = 0, ss->ss3.depth = 0;
+ 
+    ss->ss5.mip_count = 2, ss->ss5.min_lod = 0, ss->ss5.pad3 = 0, ss->ss5.coherency_type = 0, ss->ss5.pad2 = 0, ss->ss5.ewa_disable_for_cube = 0, ss->ss5.y_offset = 0, 
+            ss->ss5.pad0 = 0, ss->ss5.x_offset = 0;
+
+    }*/
 	return offset;
 }
 

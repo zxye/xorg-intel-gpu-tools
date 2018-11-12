@@ -65,6 +65,7 @@ typedef struct {
 static void scratch_buf_init_src(data_t *data, struct igt_buf *buf)
 {
 	drm_intel_bo *bo;
+	FILE *intra_image;
 
 	bo = drm_intel_bo_alloc(data->bufmgr, "", INPUT_SIZE, 4096);
 
@@ -78,6 +79,29 @@ static void scratch_buf_init_src(data_t *data, struct igt_buf *buf)
 	buf->stride = STRIDE;
 	buf->tiling = I915_TILING_NONE;
 	buf->size = INPUT_SIZE;
+
+
+	intra_image = fopen("SourceFrameI.yu12", "rb");
+	igt_assert(intra_image);
+	igt_assert(fread(data->linear, 1, sizeof(data->linear), intra_image) == sizeof(data->linear));
+	/*
+	memset(data->linear,0,sizeof(data->linear));
+	data->linear[0] = 0xc6;
+	data->linear[1] = 0xb9;
+	data->linear[2] = 0xab;
+	data->linear[3] = 0xa4;
+	*/
+	for (int i=0; i<HEIGHT; i++)
+	{
+		for (int j=0; j<WIDTH; j++)
+		{
+			printf("%x ",data->linear[i*HEIGHT+j]);
+		}
+		printf("\n");
+	}
+	gem_write(data->drm_fd, buf->bo->handle, 0, data->linear, sizeof(data->linear)); 
+
+	fclose(intra_image);
 }
 
 static void scratch_buf_init_dst(data_t *data, struct igt_buf *buf)
@@ -506,6 +530,7 @@ igt_simple_main
 	struct intel_batchbuffer *batch = NULL;
 	struct igt_buf src, dst;
 	igt_vme_func_t media_vme = NULL;
+	uint8_t linear[OUTPUT_SIZE];
 
 	data.drm_fd = drm_open_driver_render(DRIVER_INTEL);
 	igt_require_gem(data.drm_fd);
@@ -531,4 +556,10 @@ igt_simple_main
     shut_non_vme_subslices(data.drm_fd, batch->ctx);
 
 	media_vme(batch, &src, WIDTH, HEIGHT, &dst);
+	gem_read(data.drm_fd, dst.bo->handle, 0,
+		linear, sizeof(linear));
+	for (int i=0; i< sizeof(linear); i++)
+	{
+		printf("%x ",linear[i]);
+	}
 }
