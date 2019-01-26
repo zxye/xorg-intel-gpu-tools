@@ -911,7 +911,7 @@ igt_media_spinfunc_t igt_get_media_spinfunc(int devid)
 {
 	igt_media_spinfunc_t spin = NULL;
 
-	if (IS_GEN9(devid))
+	if (IS_GEN11(devid) || IS_GEN9(devid))
 		spin = gen9_media_spinfunc;
 	else if (IS_GEN8(devid))
 		spin = gen8_media_spinfunc;
