@@ -42,10 +42,41 @@ static void batch_fini(int fd, uint32_t handle)
 	gem_close(fd, handle);
 }
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+int trace_fd = -1;
+int marker_fd = -1;
+char trace_buffer[512];
+
+void simple_trace()
+{
+    /*
+    trace_fd = open("/sys/kernel/debug/tracing/tracing_on", O_WRONLY);
+    if (trace_fd >= 0)
+                    write(trace_fd, "1", 1);
+    close(trace_fd);
+    */
+    marker_fd = open("/sys/kernel/debug/tracing/trace_marker", O_WRONLY);
+
+    static int iframe=0;
+    sprintf(trace_buffer,"iHD batch %d.\n",iframe++);
+    if (marker_fd >= 0)
+    {
+        printf("%s %lu\n", trace_buffer,strlen(trace_buffer));
+        write(marker_fd, trace_buffer, strlen(trace_buffer));
+    }
+
+    close(marker_fd);
+}
+
 static void noop(int fd, unsigned ring)
 {
 	struct drm_i915_gem_execbuffer2 execbuf;
 	struct drm_i915_gem_exec_object2 exec;
+
+simple_trace();
 
 	gem_require_ring(fd, ring);
 
